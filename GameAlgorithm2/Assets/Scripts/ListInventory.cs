@@ -39,4 +39,20 @@ public class ListInventory : MonoBehaviour
             Debug.Log(i + "번 슬롯: " + items[i].itemName + " x" + items[i].quantity);
         }
     }
+    public void RemoveItemAll(string itemName)
+    {
+        int count = items.Count;
+        items.RemoveAll(x => x.itemName == itemName);
+
+        int removedCount = count - items.Count;
+
+        if (removedCount > 0)
+        {
+            Debug.Log(itemName + " 아이템이 전부 삭제됨 (슬롯 수: " + removedCount + ", 현재 개수: " + items.Count + ")");
+        }
+        else
+        {
+            Debug.Log(itemName + " 아이템이 없습니다.");
+        }
+    }
 }
