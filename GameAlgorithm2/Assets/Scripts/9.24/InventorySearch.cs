@@ -5,62 +5,135 @@ using UnityEngine;
 
 public class InventorySearch : MonoBehaviour
 {
-    List<Item> items = new List<Item>();
-    public TMP_Text itemText;
-    public GameObject itemImage;
+    [Header("UI References")]
+    public TMP_InputField searchInput;     
+    public Transform content;              
+    public GameObject itemPrefab;          
 
-    private System.Random Random = new System.Random();
+    [Header("Generate Settings")]
+    public int itemCount = 100;            
+    public Vector2Int qtyRange = new Vector2Int(1, 100);
+
+    private readonly List<Item> items = new List<Item>();
+    private System.Random rng = new System.Random();
 
     void Start()
     {
-        for (int i = 0; i <= 100; i++)
+        GenerateItems();
+        DisplayAllItems();
+    }
+
+    void GenerateItems()
+    {
+        items.Clear();
+        for (int i = 0; i < itemCount; i++)
         {
-            //이미지 생성 및 이미지 하위 텍스트에 이름 넣기
-            //그 이름 찾아와서 같은지 확인
-            string name = $"Item_{i:03}";   //Item_0001 형식
-            int qty = Random.Next(1, 100);
+            string name = $"Item_{i:00}";
+            int qty = rng.Next(qtyRange.x, qtyRange.y);
             items.Add(new Item(name, qty));
         }
-
     }
 
-    public void FindLinear()
+    void ClearContent()
     {
-        string target = itemText.text;
-        Item foundLinear = FindItemLinear(target);
+        for (int i = content.childCount - 1; i >= 0; i--)
+            Destroy(content.GetChild(i).gameObject);
     }
 
-    public void FindBinary()
+    void DisplayItems(List<Item> list)
     {
-        string target = itemText.text;
-        items.Sort((a, b) => a.itemName.CompareTo(b.itemName));
-        Item foundBinary = FindItembinary(target);
-    }
+        ClearContent();
 
-    public Item FindItemLinear(string targetName)
-    {
-        foreach (Item item in items)
+        for (int i = 0; i < list.Count; i++)
         {
-            if (item.itemName == targetName)
-                return item;
+            var go = Instantiate(itemPrefab, content, false);
+            ItemView view = go.GetComponent<ItemView>();
+            if (view != null) view.Set(list[i]);
+        }
+    }
+
+    void DisplayAllItems()
+    {
+        DisplayItems(items);
+    }
+
+    Item FindItemLinear(string target)
+    {
+        for (int i = 0; i < items.Count; i++)
+        {
+            if (string.Equals(items[i].itemName, target, System.StringComparison.OrdinalIgnoreCase))
+                return items[i];
         }
         return null;
     }
 
-    public Item FindItembinary(string targetName)
+    Item FindItemBinary(string target)
     {
+        List<Item> sorted = new List<Item>(items);
+        sorted.Sort((a, b) => string.Compare(a.itemName, b.itemName, System.StringComparison.OrdinalIgnoreCase));
+
         int left = 0;
-        int right = items.Count - 1;
+        int right = sorted.Count - 1;
 
         while (left <= right)
         {
             int mid = (left + right) / 2;
-            int cmp = items[mid].itemName.CompareTo(targetName);
+            int cmp = string.Compare(sorted[mid].itemName, target, System.StringComparison.OrdinalIgnoreCase);
 
-            if (cmp == 0) return items[mid];
-            else if (cmp < 0) left = mid + 1;
+            if (cmp == 0) return sorted[mid];
+            if (cmp < 0) left = mid + 1;
             else right = mid - 1;
         }
         return null;
+    }
+
+    public void OnClickSearchLinear()
+    {
+        string target = (searchInput != null ? searchInput.text : string.Empty).Trim();
+
+        if (string.IsNullOrEmpty(target))
+        {
+            DisplayAllItems();
+            return;
+        }
+
+        Item found = FindItemLinear(target);
+        if (found != null)
+        {
+            List<Item> one = new List<Item>(1); one.Add(found);
+            DisplayItems(one);
+        }
+        else ShowNotFound(target);
+    }
+
+    public void OnClickSearchBinary()
+    {
+        string target = (searchInput != null ? searchInput.text : string.Empty).Trim();
+
+        if (string.IsNullOrEmpty(target))
+        {
+            DisplayAllItems();
+            return;
+        }
+
+        Item found = FindItemBinary(target);
+        if (found != null)
+        {
+            List<Item> one = new List<Item>(1); one.Add(found);
+            DisplayItems(one);
+        }
+        else ShowNotFound(target);
+    }
+
+    void ShowNotFound(string target)
+    {
+        ClearContent();
+        GameObject go = new GameObject("NotFound", typeof(RectTransform), typeof(TMP_Text));
+        go.transform.SetParent(content, false);
+        TMP_Text t = go.GetComponent<TMP_Text>();
+        t.text = $"'{target}' NotFound";
+        t.alignment = TextAlignmentOptions.Center;
+        t.fontSize = 28f;
+        t.color = Color.white;
     }
 }
