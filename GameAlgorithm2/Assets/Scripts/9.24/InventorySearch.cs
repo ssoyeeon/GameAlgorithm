@@ -5,120 +5,62 @@ using UnityEngine;
 
 public class InventorySearch : MonoBehaviour
 {
-    [Header("UI Refrences (TMP)")]
-    public TMP_InputField inputItemCount;
-    public TMP_InputField inputSearchCount;
-    public TMP_Text resultText;
+    List<Item> items = new List<Item>();
+    public TMP_Text itemText;
+    public GameObject itemImage;
 
-    private List<Item> items = new List<Item>();
+    private System.Random Random = new System.Random();
 
-    private long sortSteps;         //정렬 비교 횟수
-    private long linearSteps;       //선형 탐색 횟수
-    private long binarySteps;       //이진 탐색 횟수
-
-    public void OnFindButton()
+    void Start()
     {
-        if (!int.TryParse(inputItemCount.text, out int itemCount)) itemCount = 10000;
-        if (!int.TryParse(inputSearchCount.text, out int searchCount)) searchCount = 100;
-
-        items.Clear();
-        for (int i = 0; i < itemCount; i++)
+        for (int i = 0; i <= 100; i++)
         {
-            items.Add(new Item($"Item_{Random.Range(0, itemCount):D5}", 1));
+            //이미지 생성 및 이미지 하위 텍스트에 이름 넣기
+            //그 이름 찾아와서 같은지 확인
+            string name = $"Item_{i:03}";   //Item_0001 형식
+            int qty = Random.Next(1, 100);
+            items.Add(new Item(name, qty));
         }
 
-        List<string> targets = new List<string>();
-        for (int i = 0; i < searchCount; i++)
-        {
-            targets.Add($"Item_{Random.Range(0, itemCount):D5}");
-        }
-
-        //1. 선형 탐색
-        linearSteps = 0;
-        foreach (var t in targets)
-        {
-            linearSteps += FindItemLinearSteps(t);
-        }
-
-        sortSteps = 0;
-        QuickSort(items, 0, items.Count - 1);   //정렬 (비교 횟수 기록됨)
-
-        binarySteps = 0;
-        foreach (var t in targets)
-        {
-            binarySteps += FindItemBinarySteps(t);
-        }
-
-        resultText.text =
-            $"Item Count : {itemCount}\n" +
-            $"Search Count : {searchCount}\n\n\n" +
-            $"Linear Search Total Comparisons: {linearSteps}\n\n" +
-            $"Quick Sort Comparisons : {sortSteps} \n" +
-            $"Binary Search total Comparisons : {binarySteps}\n" +
-            $"Total (Sort + Binary) : {sortSteps + binarySteps}";
     }
 
-    private void QuickSort(List<Item> list, int left, int right)
+    public void FindLinear()
     {
-        if (left >= right) return;
-
-        int pivotIndex = Partition(list, left, right);
-        QuickSort(list, left, pivotIndex - 1);
-        QuickSort(list, pivotIndex + 1, right);
+        string target = itemText.text;
+        Item foundLinear = FindItemLinear(target);
     }
 
-    private int Partition(List<Item> list, int left, int right)
+    public void FindBinary()
     {
-        Item pivot = list[right];
-        int i = left - 1;
-
-        for (int j = left; j <= right; j++)
-        {
-            sortSteps++;
-            if (list[j].itemName.CompareTo(pivot.itemName) < 0)
-            {
-                i++;
-                Swap(list, i, j);
-            }
-        }
-        Swap(list, i + 1, right);
-        return i + 1;
+        string target = itemText.text;
+        items.Sort((a, b) => a.itemName.CompareTo(b.itemName));
+        Item foundBinary = FindItembinary(target);
     }
 
-    private void Swap(List<Item> list, int a, int b)
+    public Item FindItemLinear(string targetName)
     {
-        Item temp = list[a];
-        list[a] = list[b];
-        list[b] = temp;
-    }
-
-    private int FindItemLinearSteps(string target)
-    {
-        int steps = 0;
         foreach (Item item in items)
         {
-            steps++;
-            if (item.itemName == target)
-                return steps;
+            if (item.itemName == targetName)
+                return item;
         }
-        return steps;
+        return null;
     }
 
-    private int FindItemBinarySteps(string target)
+    public Item FindItembinary(string targetName)
     {
-        int steps = 0;
-        int left = 0, right = items.Count - 1;
+        int left = 0;
+        int right = items.Count - 1;
 
         while (left <= right)
         {
-            steps++;
             int mid = (left + right) / 2;
-            int cmp = items[mid].itemName.CompareTo(target);
+            int cmp = items[mid].itemName.CompareTo(targetName);
 
-            if (cmp == 0) return steps;
+            if (cmp == 0) return items[mid];
             else if (cmp < 0) left = mid + 1;
             else right = mid - 1;
         }
-        return steps;
+        return null;
     }
 }
