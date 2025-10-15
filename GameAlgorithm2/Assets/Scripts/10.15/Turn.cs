@@ -13,11 +13,11 @@ public class Turn : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            i++;
             //Debug.Log($"{i}턴 입니다.");
             while (queue.Count > 0)
             {
                 Debug.Log($"{i}턴 / {queue.Dequeue()}의 턴입니다.");
+                i++;
             }
         }
     }

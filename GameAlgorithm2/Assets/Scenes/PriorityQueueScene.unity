@@ -294,7 +294,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turn: {fileID: 592111115}
   speed: 10
-  chacName: "\uAC80\uC0AC"
+  chacName: "\uAD81\uC218"
   amount: 0
   isTurn: 0
 --- !u!4 &133619064
@@ -482,7 +482,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turn: {fileID: 592111115}
   speed: 5
-  chacName: "\uAD81\uC218"
+  chacName: "\uC804\uC0AC"
   amount: 0
   isTurn: 0
 --- !u!4 &800305384
