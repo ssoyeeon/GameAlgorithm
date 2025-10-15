@@ -1,58 +1,63 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EchoMoving : MonoBehaviour
+public class EcoMoving : MonoBehaviour
 {
     public float speed = 5f;
+    private Renderer rend;
 
-    private Queue<Vector3> recorded;   // 기록된 이동 델타들 (재생용)
-    private Stack<Vector3> played;     // 방금 재생된 델타들 (역행용)
+    struct Cmd { public bool rewind; public Vector3 delta; public Cmd(bool r, Vector3 d) { rewind = r; delta = d; } }
 
-    private bool isRecording = false;
-    private bool isPlaying = false;
+    Queue<Cmd> script = new Queue<Cmd>();
+    Stack<Vector3> played = new Stack<Vector3>();
+    bool isRecording, isPlaying;
 
     void Start()
     {
-        recorded = new Queue<Vector3>();
-        played = new Stack<Vector3>();
+        rend = GetComponent<Renderer>();
+        rend.material.color = Color.white;
     }
 
     void Update()
     {
-        if (isRecording && !isPlaying)
+        rend.material.color = Color.white; // 기본은 항상 흰색
+
+        if (isRecording)
         {
             float x = Input.GetAxisRaw("Horizontal");
             float y = Input.GetAxisRaw("Vertical");
-            Vector3 delta = new Vector3(x, y, 0f) * speed * Time.deltaTime;
+            bool r = Input.GetKey(KeyCode.R);
 
-            if (delta.sqrMagnitude > 0f)
-                recorded.Enqueue(delta);
+            if (r) script.Enqueue(new Cmd(true, Vector3.zero));
+            Vector3 d = new Vector3(x, y, 0f) * speed * Time.deltaTime;
+            if (!r && d.sqrMagnitude > 0f) script.Enqueue(new Cmd(false, d));
         }
-        else if (isPlaying && !isRecording)
+        else if (isPlaying)
         {
-            bool rewinding = Input.GetKey(KeyCode.R);
-
-            if (rewinding)
+            if (Input.GetKey(KeyCode.R) && played.Count > 0)
             {
-                if (played.Count > 0)
-                {
-                    GetComponent<Renderer>().material.color = Color.blue;
-                    Vector3 d = played.Pop();
-                    transform.position -= d;
-                }
-            }
-            else
-            {
-                if (recorded.Count > 0)
-                {
-                    Vector3 d = recorded.Dequeue();
-                    transform.position += d;
-                    played.Push(d);
-                }
+                transform.position -= played.Pop();
+                rend.material.color = Color.blue;
+                return;
             }
 
-            if (recorded.Count == 0 && played.Count == 0)
-                isPlaying = false;
+            if (script.Count > 0)
+            {
+                var c = script.Dequeue();
+                if (c.rewind)
+                {
+                    if (played.Count > 0)
+                    {
+                        transform.position -= played.Pop();
+                        rend.material.color = Color.blue;
+                    }
+                }
+                else
+                {
+                    transform.position += c.delta;
+                    played.Push(c.delta);
+                }
+            }
         }
     }
 
@@ -60,9 +65,9 @@ public class EchoMoving : MonoBehaviour
     {
         isPlaying = false;
         isRecording = true;
-        recorded.Clear();
+        script.Clear();
         played.Clear();
-        GetComponent<Renderer>().material.color = Color.white;
+        rend.material.color = Color.white;
     }
 
     public void OnClickPlay()
@@ -70,5 +75,6 @@ public class EchoMoving : MonoBehaviour
         isRecording = false;
         isPlaying = true;
         played.Clear();
+        rend.material.color = Color.white;
     }
 }
