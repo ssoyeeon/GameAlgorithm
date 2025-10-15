@@ -6,7 +6,6 @@ using UnityEngine;
 public class Turn : MonoBehaviour
 {
     public static Turn Instance;
-    public PQueueTest queueTest;
     public SimplePriorityQueue<string> queue = new SimplePriorityQueue<string>();
     public int i = 0;
 
@@ -15,13 +14,10 @@ public class Turn : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             i++;
-            if (queueTest.isTrun == true)
+            //Debug.Log($"{i}턴 입니다.");
+            while (queue.Count > 0)
             {
-                while (queue.Count > 0)
-                {
-                    Debug.Log($"{i}턴 / {queue.Dequeue()}의 턴입니다.");
-                    queueTest.isTrun = false;
-                }
+                Debug.Log($"{i}턴 / {queue.Dequeue()}의 턴입니다.");
             }
         }
     }

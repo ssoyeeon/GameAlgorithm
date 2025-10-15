@@ -13,7 +13,7 @@ public class PQueueTest : MonoBehaviour
     public string chacName;
     
     public int amount = 0;
-    public bool isTrun;
+    public bool isTurn;
 
     private void Start()
     {
@@ -27,9 +27,10 @@ public class PQueueTest : MonoBehaviour
             amount += speed;
             if(amount >= 100)
             {
-                isTrun = true;
-                amount -= 100;
+                isTurn = true;
                 turn.queue.Enqueue(chacName, speed);
+                isTurn = false;
+                amount -= 100;
             }
         }
     }
