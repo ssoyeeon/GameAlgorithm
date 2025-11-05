@@ -49,8 +49,7 @@ public class BruteForceSample : MonoBehaviour
                     for (int l_triple = 0; l_triple <= MAX_TRIPLE; l_triple++)
                     {
                         totalChecks++;
-
-                        // ===== 로그 추가 1: 현재 어떤 조합을 검사하는지 =====
+                        
                         Debug.Log($"[검사 {totalChecks}]: 퀵{i_quick}, 헤비{j_heavy}, 멀티{k_multi}, 트리플{l_triple}");
 
                         int currentCost = (i_quick * QUICK_COST) +
@@ -68,7 +67,7 @@ public class BruteForceSample : MonoBehaviour
                             if (currentDamage > bestDamage)
                             {
                                 // ===== 로그 추가 2: 최고 데미지가 갱신되는 순간 =====
-                                Debug.Log("(Damage: {currentDamage} (Cost: {currentCost})");
+                                Debug.Log($"(Damage: {currentDamage} (Cost: {currentCost})");
 
                                 bestDamage = currentDamage;
                                 bestCost = currentCost;
