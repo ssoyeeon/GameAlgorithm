@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class MazeSystem : MonoBehaviour
 {
-    public int width = 21;      // 홀수 추천
+    public int width = 21;
     public int height = 21;
-    public float cellSize = 1f; // 큐브 크기
+    public float cellSize = 1f;
 
     int[,] map;
     Transform root;
@@ -47,7 +47,6 @@ public class MazeSystem : MonoBehaviour
         Visualize();
     }
 
-    // DFS 백트래킹 미로 생성
     int[,] GenerateMaze(int w, int h)
     {
         int[,] maze = new int[w, h];
@@ -98,7 +97,6 @@ public class MazeSystem : MonoBehaviour
         return (x >= 0 && y >= 0 && x < width && y < height);
     }
 
-    // 탈출 가능 DFS 검사
     bool CanEscapeDFS()
     {
         bool[,] visited = new bool[width, height];
